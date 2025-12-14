@@ -1,11 +1,18 @@
 from bleak import BleakScanner
 import asyncio
+import csv
+
+f = open("data.csv", "w", newline = "", encoding = "utf-8") #opens/creates csv file in write mode
+writer = csv.writer(f)
+writer.writerow(['RSSI', 'Name', 'Manufacturer Data'])
 
 def callback(device, advertisement_data):
-    rssi = getattr(advertisement_data, "rssi", None)
-    name = getattr(advertisement_data, "local_name", "Unknown")
-    mfg = getattr(advertisement_data, "manufacturer_data", {})
-    print(f"{device.address} RSSI:{rssi} Name:{name} MFG:{mfg}")
+    writer.writerow([
+        getattr(advertisement_data, "rssi", None),
+        getattr(advertisement_data, "local_name", "Unknown"),
+        getattr(advertisement_data, "manufacturer_data", {})
+    ])
+    f.flush() #makes python write any buffered data to disk, avoiding any incidents of missing data
 
 async def main():
     # Pass callback to the constructor
@@ -19,6 +26,7 @@ async def main():
         print("\nStopping scan (Ctrl+C pressed)")
     finally:
         await scanner.stop()
+        f.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
