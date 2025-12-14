@@ -1,16 +1,19 @@
 import asyncio
 from bleak import BleakScanner
 import csv
+from datetime import datetime
 
-f = open("data.csv", "w", newline = "", encoding = "utf-8") #opens/creates csv file in write mode
+f = open("data.csv", "w", newline="", encoding="utf-8")
 writer = csv.writer(f)
-writer.writerow(['RSSI', 'Name', 'Manufacturer Data'])
+writer.writerow(['Timestamp', 'MAC Address', 'RSSI', 'Name', 'Manufacturer Data'])
 
 def callback(device, advertisement_data):
     writer.writerow([
-        getattr(advertisement_data, "rssi", None),
-        getattr(advertisement_data, "local_name", "Unknown"),
-        getattr(advertisement_data, "manufacturer_data", {})
+        datetime.now().isoformat(),
+        device.address,
+        advertisement_data.rssi,
+        advertisement_data.local_name or "Unknown",
+        advertisement_data.manufacturer_data
     ])
     f.flush()
 
